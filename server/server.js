@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 // import Apolloserver
 const { ApolloServer } = require('apollo-server-express');
 
@@ -28,6 +29,14 @@ const startApolloServer = async (typeDefs, resolvers) => {
   await server.start();
   // integrate our Apollo server with the Express application as middleware
   server.applyMiddleware({ app });
+  // server up static assests
+  if(process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../client/build')));
+  }
+  // if we make a get to any location on the server that doesnt' have a route, respond with the production-ready React front-end code
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/build/index.html'));
+  });
 
   db.once('open', () => {
     app.listen(PORT, () => {
