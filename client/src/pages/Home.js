@@ -11,7 +11,6 @@ const Home = () => {
   // New optional chaining from JS
   // Says: 'if data exists, store in the thoughts constant, if not, then save an empty array into thoughts
   const thoughts = data?.thoughts || [];
-  console.log(thoughts);
 
   return (
     <main>
