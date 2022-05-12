@@ -1,10 +1,12 @@
 // React Router 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { setContext } from '@apollo/client/link/context';
 // ApolloProvider - react component that provides data to other components
 // ApolloClient - constructor function that initializes the connection to the graphQL API server
 // InMemoryCache - lets ApolloClient cache API response data so that we can perform requests more efficiently
 // createHttpLnk - gives control to how ApolloClient makes Request. middleware for outbound network requests.
 import { ApolloProvider, ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
+
 
 import React from 'react';
 import Header from './components/Header';
@@ -21,13 +23,22 @@ import Signup from './pages/Signup';
 const httpLink = createHttpLink({
   uri: '/graphql',
 });
-
-const client = new ApolloClient({
-  link: httpLink,
-  cache: new InMemoryCache(),
+// set context retrieves the token from local storage
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem('id_token');
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  };
 });
 
-
+const client = new ApolloClient({
+  // link now has the token with every request. 
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache(),
+});
 
 function App() {
   return (
